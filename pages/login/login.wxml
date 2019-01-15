@@ -1,0 +1,21 @@
+<view style='padding:60rpx'>
+    <view class="flex-wrp" style='width:100%;justify-content:center'>
+        <image style='height:110rpx;width:500rpx' src='../../assets/imgs/login_logo.png'></image>
+    </view>
+    <view class="flex-wrp border-bottom" style="flex-direction:row;margin-top:130rpx">
+        <text class='label'>用户名</text>
+        <input class='input' bindinput='setUserName' maxlength="20" placeholder="请输入用户名" />
+    </view>
+
+    <view class="flex-wrp border-bottom" style="flex-direction:row;margin-top:40rpx">
+        <text class='label'>密  码</text>
+        <input class='input' bindinput='setPassword' type='password' maxlength="12" placeholder="请输入密码" />
+    </view>
+
+    <view class="flex-wrp" style="padding: 10px 0px 0px 0px;justify-content:space-between">
+        <view class='th-font-caption-dark' bindtap="forgetPwd">忘记密码</view>
+        <view class='th-font-caption-dark' bindtap="registe">注册账号(企业)</view>
+    </view>
+
+    <button class='button th-button-primary' type='warn' size='default' bindtap='submit'>登录</button>
+</view>

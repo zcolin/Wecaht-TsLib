@@ -1,0 +1,152 @@
+/*
+ * *********************************************************
+ *   自定义字体样式(根据md规范定义)
+ * ********************************************************
+ */
+
+/**主标题文字，亮色**/
+
+.th-font-headline-light {
+    font-size: 54rpx !important;
+    color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/**主标题文字，暗色**/
+
+.th-font-headline-dark {
+    font-size: 54rpx !important;
+    color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/**主标题文字，主题**/
+
+.th-font-headline-primary {
+    font-size: 54rpx !important;
+    color: #eb271d !important;
+}
+
+/**标题文字，亮色**/
+
+.th-font-title-light {
+    font-size: 46rpx !important;
+    color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/**标题文字，暗色**/
+
+.th-font-title-dark {
+    font-size: 46rpx !important;
+    color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/**标题文字，主题**/
+
+.th-font-title-primary {
+    font-size: 46rpx !important;
+    color: #eb271d !important;
+}
+
+/**副标题文字，亮色**/
+
+.th-font-subhead-light {
+    font-size: 40rpx !important;
+    color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/**副标题文字，暗色**/
+
+.th-font-subhead-dark {
+    font-size: 40rpx !important;
+    color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/**副标题文字，主题**/
+
+.th-font-subhead-primary {
+    font-size: 40rpx !important;
+    color: #eb271d !important;
+}
+
+/**普通文字，亮色**/
+
+.th-font-body-light {
+    font-size: 34rpx !important;
+    color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/**普通文字，暗色**/
+
+.th-font-body-dark {
+    font-size: 34rpx !important;
+    color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/**普通文字，暗色**/
+
+.th-font-body-dark-54 {
+    font-size: 34rpx !important;
+    color: rgba(0, 0, 0, 0.54) !important;
+}
+
+/**普通文字，主题**/
+
+.th-font-body-primary {
+    font-size: 34rpx !important;
+    color: #eb271d !important;
+}
+
+/**说明文字/副文**/
+
+.th-font-caption-light {
+    font-size: 30rpx !important;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+/**说明文字/副文**/
+
+.th-font-caption-dark {
+    font-size: 30rpx !important;
+    color: rgba(0, 0, 0, 0.54) !important;
+}
+
+/**说明文字/副文**/
+
+.th-font-caption-dark-87 {
+    font-size: 30rpx !important;
+    color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/**说明文字/副文**/
+
+.th-font-caption-primary {
+    font-size: 30rpx !important;
+    color: #eb271d !important;
+}
+
+/**最小文字**/
+
+.th-font-micro-light {
+    font-size: 26rpx !important;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+/**最小文字**/
+
+.th-font-micro-dark {
+    font-size: 26rpx !important;
+    color: rgba(0, 0, 0, 0.54) !important;
+}
+
+/**最小文字**/
+
+.th-font-micro-dark-87 {
+    font-size: 26rpx !important;
+    color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/**最小文字**/
+
+.th-font-micro-primary {
+    font-size: 26rpx !important;
+    color: #eb271d !important;
+}

@@ -1,0 +1,20 @@
+
+
+.page-section {
+    margin-bottom: 20rpx;
+}
+
+.flex-wrp {
+    display: flex;
+}
+
+.label{
+    min-width: 150rpx;
+}
+
+.input {
+    margin-left: 10rpx;
+}
+.button{
+    margin-top: 50rpx;
+}

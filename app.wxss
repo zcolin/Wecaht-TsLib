@@ -1,0 +1,45 @@
+/**app.wxss**/
+
+@import 'custom-font-styles.wxss';
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 200rpx 0;
+    box-sizing: border-box;
+}
+
+.page-padding{
+    padding:32rpx;
+}
+
+label, text, input{
+    font-size: 34rpx;
+}
+
+button {
+    font-size: 16px;
+    border-radius: 2px;
+}
+
+button[type=warn] {
+    color: #fff;
+    background-color: #eb271d;
+}
+
+.border-bottom {
+    border-bottom: 1rpx solid #f2f2f2;
+}
+
+.divider {
+    height: 1rpx;
+    background-color: #f2f2f2;
+}
+
+.divider-gap {
+    height: 8rpx;
+    background-color: #f2f2f2;
+}

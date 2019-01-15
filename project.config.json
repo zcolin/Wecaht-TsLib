@@ -1,0 +1,24 @@
+{
+	"description": "项目配置文件",
+	"packOptions": {
+		"ignore": []
+	},
+	"compileType": "miniprogram",
+	"libVersion": "2.5.0",
+	"projectname": "TsLib",
+	"scripts": {
+		"beforeCompile": "npm run compile",
+		"beforePreview": "npm run compile",
+		"beforeUpload": "npm run compile"
+	},
+	"setting": {
+		"urlCheck": false,
+		"es6": true,
+		"postcss": true,
+		"minified": true,
+		"newFeature": true,
+		"autoAudits": false
+	},
+	"appid": "wxf24ed0f8a6043cea",
+	"condition": {}
+}
