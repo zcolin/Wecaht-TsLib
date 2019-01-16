@@ -8,7 +8,7 @@ export class FormatUtil {
      * @param value
      * @returns {string|string}
      */
-    static formatYesOrNo(value: number | string): string {
+    static formatYesOrNo(value: number | string): string | null {
         return value === 1 ? '是' : (value === '0' ? '否' : null);
     }
 }

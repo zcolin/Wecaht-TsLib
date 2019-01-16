@@ -1,12 +1,12 @@
-import { ZHttpReply } from './z-http-reply';
-import { ZHttpResult } from './z-http-result';
+import {ZHttpReply} from './z-http-reply';
+import {ZHttpResult} from './z-http-result';
 
 /**
  * Http 请求参数类
  */
 export interface ZHttpOption<T> {
     url?: string;               // 请求地址
-    type?: 'get' | 'post';
+    type?: 'GET' | 'POST';
     body?: any;                 // 请求参数
     header?: any;               // 请求头
     isHideLoading?: boolean;    // 是否显示进度条，此属性在multiRequest中失效

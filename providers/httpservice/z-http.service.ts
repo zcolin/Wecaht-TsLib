@@ -1,16 +1,15 @@
 /**
  * http 服务类
  */
-import { Promise } from '../../plugins/es6-promise.js';
-import { ZHttpErrorReply } from "z-http-error-reply";
-import { ZHttpResult } from "z-http-result";
-import { ZHttpOption } from 'z-http-option';
-import { ZHttpError } from 'z-http-error';
-import { ZUtil } from "../../utils/z.util";
-import { ZHttpReplyDefault } from "z-http-reply-default";
-import { ZHttpReply } from "z-http-reply";
-import { ZHttpMultiRequestOption } from "z-http-multi-request-option";
-import { ZLogUtil } from "../../utils/z-log.util";
+import {ZHttpErrorReply} from "./z-http-error-reply";
+import {ZHttpResult} from "./z-http-result";
+import {ZHttpOption} from './z-http-option';
+import {ZHttpError} from './z-http-error';
+import {ZUtil} from "../../utils/z.util";
+import {ZHttpReplyDefault} from "./z-http-reply-default";
+import {ZHttpMultiRequestOption} from "./z-http-multi-request-option";
+import {ZLogUtil} from "../../utils/z-log.util";
+import RequestTask = wx.RequestTask;
 
 export class ZHttpService {
 
@@ -21,9 +20,9 @@ export class ZHttpService {
      * @param zOption               请求参数 {@link ZHttpError}
      * @param result                回调接口 {@link ZHttpResult}
      */
-    public get<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>) {
+    public get<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>): RequestTask {
         zOption = zOption || {};
-        zOption.type = 'get';
+        zOption.type = 'GET';
         zOption.url = url || zOption.url;
         zOption.result = result || zOption.result;
         return this.request(zOption);
@@ -36,34 +35,34 @@ export class ZHttpService {
      * @param zOption               请求参数 {@link ZHttpError}
      * @param result                回调接口 {@link ZHttpResult}
      */
-    public post<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>) {
+    public post<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>): RequestTask {
         zOption = zOption || {};
-        zOption.type = 'post';
+        zOption.type = 'POST';
         zOption.url = url || zOption.url;
         zOption.result = result || zOption.result;
         return this.request(zOption);
     }
 
     /**
-   * 同时发起多个Get请求， 按自定义回调方法进行回调，回调顺序按发起顺序。有一个接口失败，则所有请求失败。
-   * @param {ZHttpMultiRequestOption[]} requestMulti
-   * @returns {Subscription}
-   */
-    public getMultiRequest(requestMulti: ZHttpMultiRequestOption) {
+     * 同时发起多个Get请求， 按自定义回调方法进行回调，回调顺序按发起顺序。有一个接口失败，则所有请求失败。
+     * @param {ZHttpMultiRequestOption[]} requestMulti
+     * @returns {Promise}
+     */
+    public getMultiRequest(requestMulti: ZHttpMultiRequestOption): Promise<any> {
         if (requestMulti.option && requestMulti.option.length > 0) {
-            requestMulti.option.forEach((value: any) => value.type = 'get');
+            requestMulti.option.forEach((value: any) => value.type = 'GET');
         }
         return this.requestMulti(requestMulti);
     }
 
     /**
-   * 同时发起多个Post请求， 已按自定义回调方法进行回调，回调数据未数组，回调顺序按发起顺序
-   * @param {ZHttpMultiRequestOption} requestMulti
-   * @returns {Subscription}
-   */
-    public postMultiRequest(requestMulti: ZHttpMultiRequestOption) {
+     * 同时发起多个Post请求， 已按自定义回调方法进行回调，回调数据未数组，回调顺序按发起顺序
+     * @param {ZHttpMultiRequestOption} requestMulti
+     * @returns {Promise}
+     */
+    public postMultiRequest(requestMulti: ZHttpMultiRequestOption): Promise<any> {
         if (requestMulti.option && requestMulti.option.length > 0) {
-            requestMulti.option.forEach((value: any) => value.type = 'post');
+            requestMulti.option.forEach((value: any) => value.type = 'POST');
         }
         return this.requestMulti(requestMulti);
     }
@@ -71,158 +70,186 @@ export class ZHttpService {
     /**
      * 同时发起多个网络请求， 已按自定义回调方法进行回调，回调数据未数组，回调顺序按发起顺序
      * @param {ZHttpMultiRequestOption[]} multiRequestOption
-     * @returns {Subscription}
+     * @returns {Promise}
      */
-    public requestMulti(multiRequestOption: ZHttpMultiRequestOption) {
-        let obArray = [];
+    public requestMulti(multiRequestOption: ZHttpMultiRequestOption): Promise<RequestTask[]> {
+        let obArray: Promise<any>[] = [];
+        let task: RequestTask[] = [];
+        multiRequestOption = multiRequestOption || {};
         if (!multiRequestOption.isHideLoading) {
             wx.showLoading({
-                title: multiRequestOption.loadingMsg,
+                title: multiRequestOption.loadingMsg || '',
             });
-        };
+        }
+
         if (multiRequestOption.option && multiRequestOption.option.length > 0) {
             for (let request of multiRequestOption.option) {
                 request.result = request.result || {};
-                obArray.push(this.requestObservable(request));
+                obArray.push(
+                    new Promise((resolve, reject) => {
+                        task.push(this.request(request, resolve, reject));
+                    }));
             }
         }
 
-        //计数回调，回调对应请求的对应回调，如果回调全部完成，则隐藏进度条
         return Promise.all(obArray)
-            .then((obj: any) => {
-                wx.hideLoading();
-                for (let i = 0; i < obj.length; i++) {
-                    let item = obj[i];
-                    if (multiRequestOption.option[i].result.success) {
-                        multiRequestOption.option[i].result.success(item);
-                    }
-                    if (multiRequestOption.option[i].result.complete) {
-                        multiRequestOption.option[i].result.complete();
-                    }
-                }
-            }).catch(
-                (error: any) => {
-                    wx.hideLoading();
-                    for (let i = 0; i < multiRequestOption.option.length; i++) {
-                        if (multiRequestOption.option[i].result.error) {
-                            multiRequestOption.option[i].result.error(error);
-                        }
-                        if (multiRequestOption.option[i].result.complete) {
-                            multiRequestOption.option[i].result.complete();
-                        }
-                    }
-                }
-            );
+                      .then((resArr: any) => {
+                          if (!multiRequestOption.isHideLoading) {
+                              wx.hideLoading({});
+                          }
+
+                          for (let i = 0; i < resArr.length; i++) {
+                              let item = resArr[i];
+                              if (multiRequestOption.option[i] && multiRequestOption.option[i].result) {
+                                  // @ts-ignore
+                                  if (multiRequestOption.option[i].result.success) {
+                                      // @ts-ignore
+                                      multiRequestOption.option[i].result.success(item);
+                                  }
+
+                                  // @ts-ignore
+                                  if (multiRequestOption.option[i].result.complete) {
+                                      // @ts-ignore
+                                      multiRequestOption.option[i].result.complete();
+                                  }
+                              }
+                          }
+                          return Promise.resolve(task);
+                      })
+                      .catch((error: any) => {
+                              wx.hideLoading({});
+                              for (let i = 0; i < multiRequestOption.option.length; i++) {
+                                  if (multiRequestOption.option[i] && multiRequestOption.option[i].result) {
+                                      // @ts-ignore
+                                      if (multiRequestOption.option[i].result.error) {
+                                          // @ts-ignore
+                                          multiRequestOption.option[i].result.error(error);
+                                      }
+
+                                      // @ts-ignore
+                                      if (multiRequestOption.option[i].result.complete) {
+                                          // @ts-ignore
+                                          multiRequestOption.option[i].result.complete();
+                                      }
+                                  }
+                              }
+                              return Promise.resolve(task);
+                          }
+                      );
     }
 
     /**
-     * 网络请求， 已按自定义回调方法进行回调
+     *网络请求， 已按自定义回调方法进行回调
      * @param {ZHttpOption} zOption
-     * @returns {Subscription}
+     * @param resolve
+     * @param reject
+     * @returns {Promise<T>}
      */
-    public request<T>(zOption: ZHttpOption<T>) {
-        zOption.result = zOption.result || {};
+    private request<T>(zOption: ZHttpOption<T>, resolve?: any, reject?: any): RequestTask {
+        ZLogUtil.log("请求地址:" + zOption.url);
+        ZLogUtil.log(zOption.body ? "请求数据:" + JSON.stringify(zOption.body) : "");
+
+        zOption.type = zOption.type || 'POST';
+        zOption.header = ZHttpService.processHeader(zOption.header); //添加通用header
+        zOption.zreply = zOption.zreply || new ZHttpReplyDefault();
+
         if (!zOption.isHideLoading) {
             wx.showLoading({
-                title: zOption.loadingMsg,
+                title: zOption.loadingMsg || '',
             });
         }
-        return this.requestObservable(zOption)
-            .then(this.successResult(zOption.result))
-            .catch(this.errorResult(zOption.result));
-    }
-
-    /**
-     * 网络请求，处理完所有业务数据，未按自定义回调方法回调，返回Observable，可以进行进一步处理
-     * @param {ZHttpOption} zOption
-     * @returns {Observable<T>}
-     */
-    public requestObservable<T>(zOption: ZHttpOption<T>) {
-        zOption.type = zOption.type || 'post';
-        zOption.header = this.processHeader(zOption.header); //添加通用header
-        zOption.zreply = zOption.zreply || new ZHttpReplyDefault();
-        ZLogUtil.log("\n===================================================================");
-        ZLogUtil.log("ADDR:" + zOption.url);
-        ZLogUtil.log(zOption.body ? "APPLY:" + JSON.stringify(zOption.body) : "");
-        return new Promise((resolve: any, reject: any) => {
-            wx.request({
-                url: zOption.url,
-                data: zOption.body,
-                header: zOption.header,
-                method: zOption.type,
-                success: res => {
-                    this.processResponse(zOption.zreply, res, zOption.isHideLoading, resolve, reject);
-                },
-                fail: error => {
-                    this.processCatch(zOption.isHideToastError, error);
+        return wx.request({
+            url: zOption.url || '',
+            data: zOption.body,
+            header: zOption.header,
+            method: zOption.type,
+            success: res => {
+                this.processResponse(zOption, res, resolve, reject);
+            },
+            fail: error => {
+                this.processCatch(zOption, error, reject);
+            },
+            complete: () => {
+                if (!zOption.isHideLoading) {
+                    wx.hideLoading({});
                 }
-            });
+
+                if (zOption.result && zOption.result.complete) {
+                    zOption.result.complete();
+                }
+            }
         });
     }
 
     /**
-     * 获取默认的Header信息
-     */
-    public processHeader(header: any) {
-        return {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            // 'X-TH-TOKEN': UserService.getToken()
-        }
-    }
-
-    /**
      * 处理返回信息
-     * @param zreply   自定义结果对象
+     * @param zOption
      * @param res      http响应对象
+     * @param resolve
+     * @param reject
      */
-    public processResponse(zreply: ZHttpReply, res: any, isHideLoading: boolean, resolve: any, reject: any) {
-        let jsonObj = res; //此处jsonObj一定有值，如果转换错误，会再processCatch中处理
-        ZLogUtil.log("===================================================================");
-        ZLogUtil.log("REPLY:" + JSON.stringify(jsonObj));
+    public processResponse<T>(zOption: ZHttpOption<T>, res?: any, resolve?: any, reject?: any) {
+        ZLogUtil.log("返回地址:" + zOption.url);
+        ZLogUtil.log("返回数据:" + JSON.stringify(res));
 
-        if (zreply.isSuccess(jsonObj[zreply.codeKey])) {
-            if (jsonObj[zreply.dataKey]) {
-                resolve(jsonObj[zreply.dataKey]);
-            } else {
-                resolve(jsonObj);
+        let jsonObj = res;
+        if (zOption.zreply) {
+            if (zOption.result && zOption.result.success && zOption.zreply.isSuccess(jsonObj[zOption.zreply.codeKey])) {
+                if (jsonObj[zOption.zreply.dataKey]) {
+                    zOption.result.success(jsonObj[zOption.zreply.dataKey]);
+                    if (resolve) {
+                        resolve(jsonObj[zOption.zreply.dataKey]);
+                    }
+                } else {
+                    zOption.result.success(jsonObj);
+                    if (resolve) {
+                        resolve(jsonObj[zOption.zreply.dataKey]);
+                    }
+                }
+                return;
             }
-            return;
-        }
 
-        if (!zreply.isSuccess(jsonObj[zreply.codeKey]) && (jsonObj[zreply.codeKey] || jsonObj[zreply.msgKey])) { //是json对象，但是不是约定中的数据
-            reject(this.processCatch(isHideLoading, new ZHttpError(jsonObj.code, jsonObj.msg)));
-        } else {
-            reject(this.processCatch(isHideLoading, new ZHttpError(1001, "数据不符合规范：\n" + JSON.stringify(res)))) //解析的json数据不符合规范
+            if (!zOption.zreply.isSuccess(jsonObj[zOption.zreply.codeKey]) && (jsonObj[zOption.zreply.codeKey] || jsonObj[zOption.zreply.msgKey])) { //是json对象，但是不是约定中的数据
+                this.processCatch(zOption, new ZHttpError(jsonObj.code, jsonObj.msg), reject);
+            } else {
+                this.processCatch(zOption, new ZHttpError(1001, "数据不符合规范：\n" + JSON.stringify(res)), reject); //解析的json数据不符合规范
+            }
         }
     }
 
     /**
      * 处理异常信息
-     * @param isHideToastError      是否显示errorToast
+     * @param zOption
      * @param error                 错误对象
+     * @param reject
      */
-    public processCatch(isHideToastError: boolean, error: any) {
+    public processCatch<T>(zOption: ZHttpOption<T>, error: any, reject?: any) {
         let errorObj;
         if (error instanceof ZHttpError || (ZUtil.isValid(error.code) && ZUtil.isValid(error.errMsg))) { //自己定义的错误 intanceof判断不出来？
-
-            errorObj = this.getErrorReply(error.errMsg, error.code); //服务器返回的错误
+            errorObj = ZHttpService.getErrorReply(error.errMsg, error.code); //服务器返回的错误
         } else {
-            errorObj = this.getErrorReply(error.errMsg, -1);
+            errorObj = ZHttpService.getErrorReply(error.errMsg, -1);
         }
 
-        if (!isHideToastError) {
+        if (!zOption.isHideToastError) {
             let msg = ZUtil.isValid(errorObj.code) ? errorObj.msg + "(" + errorObj.code + ")" : errorObj.msg;
             wx.showToast({
-                title: msg,
+                title: msg || '',
             })
         }
-        return errorObj;
+
+        if (zOption.result && zOption.result.error) {
+            zOption.result.error(errorObj);
+            if (reject) {
+                reject(errorObj);
+            }
+        }
     }
 
     /**
      * 获取组合ErrorReply对象
      */
-    private getErrorReply(message: string, code?: number): ZHttpErrorReply {
+    private static getErrorReply(message: string, code?: number): ZHttpErrorReply {
         let errorObj = new ZHttpErrorReply();
         errorObj.code = code; //自定义错误标识
         errorObj.msg = (message == null) ? "null" : message;
@@ -230,38 +257,15 @@ export class ZHttpService {
     }
 
     /**
-     * 处理成功回调
-     * @param {HttpResult<T>} result
-     * @returns {(obj) => void}
+     * 获取默认的Header信息
      */
-    private successResult<T>(result: ZHttpResult<T>) {
-        return (obj: any) => {
-            wx.hideLoading();
-            if (result.success) {
-                result.success(obj);
-            }
+    private static processHeader(header: any) {
+        if (!header) {
+            header = {};
+        }
 
-            if (result.complete) {
-                result.complete();
-            }
-        };
-    }
-
-    /**
-     * 处理错误回调
-     * @param {HttpResult<T>} result
-     * @returns {(error) => void}
-     */
-    private errorResult<T>(result: ZHttpResult<T>) {
-        return (error: any) => {
-            wx.hideLoading();
-            if (result.error) {
-                result.error(error);
-            }
-
-            if (result.complete) {
-                result.complete();
-            }
-        };
+        header['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+        //header['X-TH-TOKEN']= UserService.getToken()
+        return header;
     }
 }
