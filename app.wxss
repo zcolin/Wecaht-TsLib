@@ -1,5 +1,4 @@
 /**app.wxss**/
-
 @import 'custom-font-styles.wxss';
 
 .container {
@@ -12,11 +11,11 @@
     box-sizing: border-box;
 }
 
-.page-padding{
-    padding:32rpx;
+.page-padding {
+    padding: 32rpx;
 }
 
-label, text, input{
+label, text, input {
     font-size: 34rpx;
 }
 

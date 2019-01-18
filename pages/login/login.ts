@@ -1,4 +1,4 @@
-import {ZHttpService} from '../../providers/httpservice/z-http.service'
+import {ZHttp} from "../../utils/http/z.http";
 
 Page({
     /**
@@ -9,14 +9,14 @@ Page({
         password: ''
     },
     setUserName(e: any) {
-        console.log(e.detail.value)
+        console.log(e.detail.value);
         // @ts-ignore
         this.setData({
             username: e.detail.value
         });
     },
     setPassword(e: any) {
-        console.log(e.detail.value)
+        console.log(e.detail.value);
         // @ts-ignore
         this.setData({
             password: e.detail.value
@@ -36,8 +36,7 @@ Page({
         })
     },
     submit() {
-        let http = new ZHttpService();
-        http.get('http://apicloud.mob.com/v1/weather/query?key=2978a390aaaed&city=%E6%B5%8E%E5%8D%97',
+        ZHttp.get('http://apicloud.mob.com/v1/weather/query?key=2978a390aaaed&city=%E6%B5%8E%E5%8D%97',
             {
                 loadingMsg: '正在加载……',
                 isHideToastError: true,
@@ -53,7 +52,10 @@ Page({
                     console.log(data);
                     wx.showToast({
                         title: '请求成功',
-                    })
+                    });
+                    
+                    wx.switchTab({url: '/pages/index/index'});
+                    wx.setStorageSync('username', '张三');
                 },
                 error: (errMsg: any) => {
                     wx.showToast({

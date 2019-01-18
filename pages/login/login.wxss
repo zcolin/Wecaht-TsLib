@@ -14,6 +14,7 @@
 
 .input {
     margin-left: 10rpx;
+    width: 100%;
 }
 .button{
     margin-top: 50rpx;

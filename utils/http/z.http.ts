@@ -5,13 +5,13 @@ import {ZHttpErrorReply} from "./z-http-error-reply";
 import {ZHttpResult} from "./z-http-result";
 import {ZHttpOption} from './z-http-option';
 import {ZHttpError} from './z-http-error';
-import {ZUtil} from "../../utils/z.util";
+import {ZUtil} from "../z.util";
 import {ZHttpReplyDefault} from "./z-http-reply-default";
 import {ZHttpMultiRequestOption} from "./z-http-multi-request-option";
-import {ZLogUtil} from "../../utils/z-log.util";
+import {ZLogUtil} from "../z-log.util";
 import RequestTask = wx.RequestTask;
 
-export class ZHttpService {
+export class ZHttp {
 
     /**
      * get请求(优先使用url，result参数，如果不设置，则使用zOption中的url，result, 如果zOption为空，则新建zOption)
@@ -20,12 +20,12 @@ export class ZHttpService {
      * @param zOption               请求参数 {@link ZHttpError}
      * @param result                回调接口 {@link ZHttpResult}
      */
-    public get<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>): RequestTask {
+    public static get<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>): RequestTask {
         zOption = zOption || {};
         zOption.type = 'GET';
         zOption.url = url || zOption.url;
         zOption.result = result || zOption.result;
-        return this.request(zOption);
+        return ZHttp.request(zOption);
     }
 
     /**
@@ -35,12 +35,12 @@ export class ZHttpService {
      * @param zOption               请求参数 {@link ZHttpError}
      * @param result                回调接口 {@link ZHttpResult}
      */
-    public post<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>): RequestTask {
+    public static post<T>(url: string, zOption: ZHttpOption<T>, result: ZHttpResult<T>): RequestTask {
         zOption = zOption || {};
         zOption.type = 'POST';
         zOption.url = url || zOption.url;
         zOption.result = result || zOption.result;
-        return this.request(zOption);
+        return ZHttp.request(zOption);
     }
 
     /**
@@ -48,11 +48,11 @@ export class ZHttpService {
      * @param {ZHttpMultiRequestOption[]} requestMulti
      * @returns {Promise}
      */
-    public getMultiRequest(requestMulti: ZHttpMultiRequestOption): Promise<any> {
+    public static getMultiRequest(requestMulti: ZHttpMultiRequestOption): Promise<any> {
         if (requestMulti.option && requestMulti.option.length > 0) {
             requestMulti.option.forEach((value: any) => value.type = 'GET');
         }
-        return this.requestMulti(requestMulti);
+        return ZHttp.requestMulti(requestMulti);
     }
 
     /**
@@ -60,11 +60,11 @@ export class ZHttpService {
      * @param {ZHttpMultiRequestOption} requestMulti
      * @returns {Promise}
      */
-    public postMultiRequest(requestMulti: ZHttpMultiRequestOption): Promise<any> {
+    public static postMultiRequest(requestMulti: ZHttpMultiRequestOption): Promise<any> {
         if (requestMulti.option && requestMulti.option.length > 0) {
             requestMulti.option.forEach((value: any) => value.type = 'POST');
         }
-        return this.requestMulti(requestMulti);
+        return ZHttp.requestMulti(requestMulti);
     }
 
     /**
@@ -72,7 +72,7 @@ export class ZHttpService {
      * @param {ZHttpMultiRequestOption[]} multiRequestOption
      * @returns {Promise}
      */
-    public requestMulti(multiRequestOption: ZHttpMultiRequestOption): Promise<RequestTask[]> {
+    public static requestMulti(multiRequestOption: ZHttpMultiRequestOption): Promise<RequestTask[]> {
         let obArray: Promise<any>[] = [];
         let task: RequestTask[] = [];
         multiRequestOption = multiRequestOption || {};
@@ -101,16 +101,12 @@ export class ZHttpService {
                           for (let i = 0; i < resArr.length; i++) {
                               let item = resArr[i];
                               if (multiRequestOption.option[i] && multiRequestOption.option[i].result) {
-                                  // @ts-ignore
-                                  if (multiRequestOption.option[i].result.success) {
-                                      // @ts-ignore
-                                      multiRequestOption.option[i].result.success(item);
+                                  if (multiRequestOption.option[i].result!.success) {
+                                      multiRequestOption.option[i].result!.success!(item);
                                   }
 
-                                  // @ts-ignore
-                                  if (multiRequestOption.option[i].result.complete) {
-                                      // @ts-ignore
-                                      multiRequestOption.option[i].result.complete();
+                                  if (multiRequestOption.option[i].result!.complete) {
+                                      multiRequestOption.option[i].result!.complete!();
                                   }
                               }
                           }
@@ -120,16 +116,12 @@ export class ZHttpService {
                               wx.hideLoading({});
                               for (let i = 0; i < multiRequestOption.option.length; i++) {
                                   if (multiRequestOption.option[i] && multiRequestOption.option[i].result) {
-                                      // @ts-ignore
-                                      if (multiRequestOption.option[i].result.error) {
-                                          // @ts-ignore
-                                          multiRequestOption.option[i].result.error(error);
+                                      if (multiRequestOption.option[i].result!.error) {
+                                          multiRequestOption.option[i].result!.error!(error);
                                       }
 
-                                      // @ts-ignore
-                                      if (multiRequestOption.option[i].result.complete) {
-                                          // @ts-ignore
-                                          multiRequestOption.option[i].result.complete();
+                                      if (multiRequestOption.option[i].result!.complete) {
+                                          multiRequestOption.option[i].result!.complete!();
                                       }
                                   }
                               }
@@ -145,12 +137,12 @@ export class ZHttpService {
      * @param reject
      * @returns {Promise<T>}
      */
-    private request<T>(zOption: ZHttpOption<T>, resolve?: any, reject?: any): RequestTask {
+    private static request<T>(zOption: ZHttpOption<T>, resolve?: any, reject?: any): RequestTask {
         ZLogUtil.log("请求地址:" + zOption.url);
         ZLogUtil.log(zOption.body ? "请求数据:" + JSON.stringify(zOption.body) : "");
 
         zOption.type = zOption.type || 'POST';
-        zOption.header = ZHttpService.processHeader(zOption.header); //添加通用header
+        zOption.header = ZHttp.processHeader(zOption.header); //添加通用header
         zOption.zreply = zOption.zreply || new ZHttpReplyDefault();
 
         if (!zOption.isHideLoading) {
@@ -164,10 +156,10 @@ export class ZHttpService {
             header: zOption.header,
             method: zOption.type,
             success: res => {
-                this.processResponse(zOption, res, resolve, reject);
+                ZHttp.processResponse(zOption, res, resolve, reject);
             },
             fail: error => {
-                this.processCatch(zOption, error, reject);
+                ZHttp.processCatch(zOption, error, reject);
             },
             complete: () => {
                 if (!zOption.isHideLoading) {
@@ -188,7 +180,7 @@ export class ZHttpService {
      * @param resolve
      * @param reject
      */
-    public processResponse<T>(zOption: ZHttpOption<T>, res?: any, resolve?: any, reject?: any) {
+    public static processResponse<T>(zOption: ZHttpOption<T>, res?: any, resolve?: any, reject?: any) {
         ZLogUtil.log("返回地址:" + zOption.url);
         ZLogUtil.log("返回数据:" + JSON.stringify(res));
 
@@ -210,9 +202,9 @@ export class ZHttpService {
             }
 
             if (!zOption.zreply.isSuccess(jsonObj[zOption.zreply.codeKey]) && (jsonObj[zOption.zreply.codeKey] || jsonObj[zOption.zreply.msgKey])) { //是json对象，但是不是约定中的数据
-                this.processCatch(zOption, new ZHttpError(jsonObj.code, jsonObj.msg), reject);
+                ZHttp.processCatch(zOption, new ZHttpError(jsonObj.code, jsonObj.msg), reject);
             } else {
-                this.processCatch(zOption, new ZHttpError(1001, "数据不符合规范：\n" + JSON.stringify(res)), reject); //解析的json数据不符合规范
+                ZHttp.processCatch(zOption, new ZHttpError(1001, "数据不符合规范：\n" + JSON.stringify(res)), reject); //解析的json数据不符合规范
             }
         }
     }
@@ -223,12 +215,12 @@ export class ZHttpService {
      * @param error                 错误对象
      * @param reject
      */
-    public processCatch<T>(zOption: ZHttpOption<T>, error: any, reject?: any) {
+    public static processCatch<T>(zOption: ZHttpOption<T>, error: any, reject?: any) {
         let errorObj;
         if (error instanceof ZHttpError || (ZUtil.isValid(error.code) && ZUtil.isValid(error.errMsg))) { //自己定义的错误 intanceof判断不出来？
-            errorObj = ZHttpService.getErrorReply(error.errMsg, error.code); //服务器返回的错误
+            errorObj = ZHttp.getErrorReply(error.errMsg, error.code); //服务器返回的错误
         } else {
-            errorObj = ZHttpService.getErrorReply(error.errMsg, -1);
+            errorObj = ZHttp.getErrorReply(error.errMsg, -1);
         }
 
         if (!zOption.isHideToastError) {
