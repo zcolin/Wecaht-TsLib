@@ -8,7 +8,7 @@ export class ZStringUtil {
      * @param value
      */
     static isEmpty(value: any): boolean {
-        return value == null || (typeof value === 'string' && value.length === 0);
+        return value == null || (typeof value === "string" && value.length === 0);
     }
 
     /**

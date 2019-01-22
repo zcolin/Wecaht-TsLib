@@ -3,7 +3,7 @@
 	"packOptions": {
 		"ignore": []
 	},
-	"compileType": "miniprogram",
+	"compileType": "plugin",
 	"libVersion": "2.5.0",
 	"projectname": "TsLib",
 	"scripts": {

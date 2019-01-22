@@ -1,1 +1,4 @@
-<view>Index</view>
+<view style='margin-top:50rpx'>
+    <button bindtap='startSwiper'>swiper</button>
+    <button type='primary' bindtap='startSwiper'>swiper</button>
+</view>

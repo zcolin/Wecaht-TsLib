@@ -301,14 +301,17 @@ export class DateUtil {
         const diffValue = now - old;
         const yearC = diffValue / year;
         const monthC = diffValue / month;
-        const weekC = diffValue / (7 * day);
         const dayC = diffValue / day;
         const hourC = diffValue / hour;
         const minC = diffValue / minute;
-        if (dayC >= 2) {
+        if (yearC >= 2) {
             return this.getDateStr(oldTime, 'yyyy-MM-dd HH:mm:ss');
+        } else if (yearC >= 1) {
+            return Math.floor(yearC) + '年前';
+        } else if (monthC >= 1) {
+            return Math.floor(monthC) + '月前';
         } else if (dayC >= 1) {
-            return '昨天' + this.getDateStr(oldTime, 'HH:mm');
+            return Math.floor(dayC) + '天前';
         } else if (hourC >= 1) {
             return Math.floor(hourC) + '小时前';
         } else if (minC >= 1) {
